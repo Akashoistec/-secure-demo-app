@@ -1,0 +1,25 @@
+name: ci
+
+
+on:
+  push:
+    branches ["master"]
+  pull-request:
+
+
+jobs:
+  build:
+    run-on: ubuntu-latest
+
+    steps:
+      _ name: checkout code
+        uses: action/checkout@v4
+
+
+      _ name: build placeholder
+        run: echo "ci is running"
+
+      - name: Run SAST (semgrep)
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/ci
