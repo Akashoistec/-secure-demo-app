@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ---------------- SAST ----------------
+      # ---------------- SAST -----------------
       - name: Run SAST (Semgrep)
         uses: returntocorp/semgrep-action@v1
         with:
