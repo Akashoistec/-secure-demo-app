@@ -3,6 +3,9 @@ name: ci
 permissions:
   contents: read
   packages: write
+  id-token: write # Required for OIDC
+
+
 
 on:
   push:
@@ -39,19 +42,30 @@ jobs:
           IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
+      #---------OIDC ECR login and assumerole-------
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::910321623036:role/dev-github-actions-ecr-push
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+          uses: aws-actions/amazon-ecr-login@v2
+
+
       # ---------- BUILD ----------
       - name: Build container image
         run: |
-          docker build -t ${{ steps.image.outputs.image }}:ci .
+          docker build -t demo-app:ci .
 
-      # ---------- REGISTRY ----------
-      - name: Login to GHCR
+      #----------Resistory-----------
+      - name: Tag image for ECR
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag demo-app:ci 910321623036.dkr.ecr.ap-south-1.amazonaws.com/demo-app:ci
 
-      - name: Push image
+      - name: Push image to ECR
         run: |
-          docker push ${{ steps.image.outputs.image }}:ci
+          docker push 910321623036.dkr.ecr.ap-south-1.amazonaws.com/demo-app:ci
 
       # ---------- INSTALL TRIVY (HOST) ----------
       - name: Install Trivy
