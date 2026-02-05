@@ -106,10 +106,11 @@ jobs:
           cosign version
 
 
-      - name: Generate Cosign key (demo)
+      - name: Sign image (keyless Cosign)
+        env:
+         COSIGN_EXPERIMENTAL: "true"
         run: |
-          cosign generate-key-pair
+          cosign sign --yes \
+            --oidc-issuer=https://token.actions.githubusercontent.com \
+            ${{ steps.digest.outputs.digest }}
 
-      - name: Sign image
-        run: |
-          cosign sign --key cosign.key ${{ steps.digest.outputs.digest }}
